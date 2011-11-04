@@ -11,6 +11,7 @@
 		<jetty.version>7.3.0.v20110203</jetty.version>
 	</properties>
 	<build>
+   	<finalName>${artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
