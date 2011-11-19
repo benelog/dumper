@@ -1,15 +1,17 @@
-
 Using dumder
 =========
 
 Download
+
     wget benelog.net/dumper.jar
   
 
 Execute (Windows)
+
     java -cp "dumper.jar;%JAVA_HOME%/lib/tools.jar" Start [port number]
 
 Execute (Linux)
+
     java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port number]
 
 
