@@ -5,7 +5,12 @@ import net.benelog.dumper.MonitorServer;
 import net.benelog.dumper.RandomNumberGenernator;
 
 /**
- * java -cp "dumper.jar;%JAVA_HOME%/lib/tools.jar" Start
+ * Windows :
+ * java -cp "dumper.jar;%JAVA_HOME%/lib/tools.jar" Start [port]
+ * 
+ * Linux :
+ * java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port]
+ * 
  * @author benelog@gmail.com
  *
  */
@@ -13,9 +18,9 @@ public class Start {
 
 	static int randomPortMin = 10000;
 	static int randomPortMax = 20000;
-	
+
 	public static void main(String[] args) throws Exception {
-		
+
 		printUsage();
 		int port = selectPort(args);
 		printServerAddressInfo(port);
@@ -35,32 +40,33 @@ public class Start {
 		return port;
 	}
 
-	private static void printServerAddressInfo(int port)
-			throws UnknownHostException {
-		InetAddress localhost =InetAddress.getLocalHost();
+	private static void printServerAddressInfo(int port) throws UnknownHostException {
+		InetAddress localhost = InetAddress.getLocalHost();
 		String ip = localhost.getHostAddress();
-		System.out.println("Web address: http://" + ip +":" + port);
+		System.out.println("Web address: http://" + ip + ":" + port);
 	}
 
 	private static void addShutdownHook(final MonitorServer server) {
-		Runtime.getRuntime().addShutdownHook(
-			new Thread(){
-				public void run(){
-					try {
-						System.out.println("Server stop");
-						server.stop();
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				try {
+					System.out.println("Server stop");
+					server.stop();
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
+			}
 		});
 	}
 
 	private static void printUsage() {
 		System.out.println("-----------------------------");
 		System.out.println("Usage:");
-		System.out
-				.println("Prompt>java -cp \"dumper.jar;%JAVA_HOME%/lib/tools.jar\" Start [port]");
+		System.out.println(" (Windows)");
+		System.out.println("   Prompt>java -cp \"dumper.jar;%JAVA_HOME%/lib/tools.jar\" Start [port]");
+		System.out.println(" (Linux)");
+		System.out.println("   Prompt>java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port]");
+
 		System.out.println();
 		System.out.println("-----------------------------");
 		System.out.println();
