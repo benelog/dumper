@@ -3,7 +3,7 @@ Using dumper
 
 Download
 
-    wget benelog.net/dumper.jar
+    wget file.benelog.net/dumper.jar
   
 
 Execute (Windows)
