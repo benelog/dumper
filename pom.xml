@@ -4,6 +4,13 @@
 	<groupId>net.benelog</groupId>
 	<artifactId>dumper</artifactId>
 	<version>2.0.0</version>
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>https://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
 	<properties>
 		<jdk-version>25</jdk-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

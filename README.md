@@ -23,3 +23,7 @@ so it has to be started with a JDK. The tools.jar of the old JDKs is not needed 
 Build
 
     mvn clean package
+
+License
+
+    MIT License. See the LICENSE file for details.
