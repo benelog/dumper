@@ -5,12 +5,10 @@ import net.benelog.dumper.MonitorServer;
 import net.benelog.dumper.RandomNumberGenernator;
 
 /**
- * Windows :
- * java -cp "dumper.jar;%JAVA_HOME%/lib/tools.jar" Start [port]
- * 
- * Linux :
- * java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port]
- * 
+ * java -jar dumper.jar [port]
+ *
+ * It requires JDK 25 or higher.
+ *
  * @author benelog@gmail.com
  *
  */
@@ -62,10 +60,8 @@ public class Start {
 	private static void printUsage() {
 		System.out.println("-----------------------------");
 		System.out.println("Usage:");
-		System.out.println(" (Windows)");
-		System.out.println("   Prompt>java -cp \"dumper.jar;%JAVA_HOME%/lib/tools.jar\" Start [port]");
-		System.out.println(" (Linux)");
-		System.out.println("   Prompt>java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port]");
+		System.out.println("   Prompt>java -jar dumper.jar [port]");
+		System.out.println(" (It requires JDK 25 or higher.)");
 
 		System.out.println();
 		System.out.println("-----------------------------");

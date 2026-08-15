@@ -4,10 +4,11 @@ import static org.mockito.BDDMockito.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.ServletException;
+import jakarta.servlet.ServletException;
 
 import net.benelog.dumper.JvmAttacher;
 import net.benelog.dumper.JvmInfo;
@@ -61,6 +62,6 @@ public class JpsServletTest {
 	private void write(String html, String fileName) throws IOException {
 		System.out.println(html);
 		File htmlFile = new File(fileName);
-		FileUtils.writeStringToFile(htmlFile, html);
+		FileUtils.writeStringToFile(htmlFile, html, StandardCharsets.UTF_8);
 	}
 }

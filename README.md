@@ -1,18 +1,25 @@
 Using Dumper
 =========
 
+Requirement
+
+    JDK 25 or higher
+
 Download
 
-    wget file.benelog.net/dumper.jar
-  
+    wget https://github.com/benelog/dumper/releases/download/v2.0.0/dumper.jar
 
-Execute (Windows)
 
-    java -cp "dumper.jar;%JAVA_HOME%/lib/tools.jar" Start [port number]
+Execute (Windows, Linux)
 
-Execute (Linux)
-
-    java -cp dumper.jar:$JAVA_HOME/lib/tools.jar Start [port number]
+    java -jar dumper.jar [port number]
 
 
 If you don't specify a port number, it will be selected between 10000 and 20000 by random.
+
+A JRE is not enough: Dumper attaches to the other JVMs on the same machine,
+so it has to be started with a JDK. The tools.jar of the old JDKs is not needed anymore.
+
+Build
+
+    mvn clean package

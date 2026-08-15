@@ -4,9 +4,9 @@ import net.benelog.dumper.servlet.JpsServlet;
 import net.benelog.dumper.servlet.JstackServlet;
 import net.benelog.dumper.servlet.StopServlet;
 
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
 
 public class MonitorServer {
 
