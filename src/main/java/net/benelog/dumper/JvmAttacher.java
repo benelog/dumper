@@ -1,14 +1,12 @@
 package net.benelog.dumper;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
 import javax.management.MBeanServerConnection;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -28,15 +26,21 @@ import com.sun.tools.attach.VirtualMachineDescriptor;
  */
 public class JvmAttacher {
 
-	private static final String DIAGNOSTIC_COMMAND_MBEAN = "com.sun.management:type=DiagnosticCommand";
+	private static final ObjectName DIAGNOSTIC_COMMAND_MBEAN = diagnosticCommandMBean();
 	private static final String THREAD_PRINT_OPERATION = "threadPrint";
 
-	public List<JvmInfo> getRunningJvms() {
-		List<JvmInfo> jvmInfos = new ArrayList<JvmInfo>();
-		for (VirtualMachineDescriptor descriptor : VirtualMachine.list()) {
-			jvmInfos.add(createJvmInfo(descriptor));
+	private static ObjectName diagnosticCommandMBean() {
+		try {
+			return new ObjectName("com.sun.management:type=DiagnosticCommand");
+		} catch (MalformedObjectNameException e) {
+			throw new IllegalStateException(e);
 		}
-		return jvmInfos;
+	}
+
+	public List<JvmInfo> getRunningJvms() {
+		return VirtualMachine.list().parallelStream()
+				.map(this::createJvmInfo)
+				.toList();
 	}
 
 	private JvmInfo createJvmInfo(VirtualMachineDescriptor descriptor) {
@@ -77,9 +81,7 @@ public class JvmAttacher {
 				vm.detach();
 			}
 			return true;
-		} catch (AttachNotSupportedException e) {
-			return false;
-		} catch (IOException e) {
+		} catch (AttachNotSupportedException | IOException e) {
 			return false;
 		}
 	}
@@ -104,10 +106,8 @@ public class JvmAttacher {
 		}
 	}
 
-	public void createThreadDump(String pid, OutputStream out) throws IOException {
-		String dump = isCurrentProcess(pid) ? readOwnThreadDump() : readThreadDump(pid);
-		out.write(dump.getBytes(StandardCharsets.UTF_8));
-		out.flush();
+	public String createThreadDump(String pid) throws IOException {
+		return isCurrentProcess(pid) ? readOwnThreadDump() : readThreadDump(pid);
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class JvmAttacher {
 	 */
 	private String invokeThreadPrint(MBeanServerConnection connection) throws IOException {
 		try {
-			return (String) connection.invoke(new ObjectName(DIAGNOSTIC_COMMAND_MBEAN),
+			return (String) connection.invoke(DIAGNOSTIC_COMMAND_MBEAN,
 					THREAD_PRINT_OPERATION,
 					new Object[] { new String[] { "-l" } },
 					new String[] { String[].class.getName() });

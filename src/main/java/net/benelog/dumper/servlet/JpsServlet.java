@@ -19,17 +19,17 @@ import net.benelog.dumper.JvmInfo;
 public class JpsServlet extends HttpServlet {
 
 	private static final long serialVersionUID = 5827074916926280433L;
-	JvmAttacher monitor = new JvmAttacher();
 
-	public JpsServlet(){
-		super();
+	private final JvmAttacher monitor;
+
+	public JpsServlet() {
+		this(new JvmAttacher());
 	}
-	
-	public JpsServlet(JvmAttacher monitor){
-		super();
+
+	public JpsServlet(JvmAttacher monitor) {
 		this.monitor = monitor;
 	}
-	
+
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/html");
@@ -40,38 +40,30 @@ public class JpsServlet extends HttpServlet {
 	}
 
 	private void print(PrintWriter out, List<JvmInfo> jvmInfos) {
-		out.println("<h1>Java processes</h1>");
-
-		out.println("<table>");
-		out.println("<tr>");
-		out.println("<th>pid</th>");
-		out.println("<th>Main class</th>");
-		out.println("<th>Main args</th>");
-		out.println("<th>VM args</th>");
-		out.println("<th>VM flags</th>");
-		out.println("</tr>");
+		out.println("""
+				<h1>Java processes</h1>
+				<table>
+				<tr>
+				<th>pid</th>
+				<th>Main class</th>
+				<th>Main args</th>
+				<th>VM args</th>
+				<th>VM flags</th>
+				</tr>""");
 		for (JvmInfo info : jvmInfos) {
-			out.println("<tr>");
-			out.println("<td>");
-			out.println("<a href='/jstack?pid=" + info.getProcessId() +"'>");			
-			out.println(info.getProcessId());
-			out.println("</a>");
-			out.println("</td>");
-			out.println("<td>");
-			out.println(info.getMainClass());
-			out.println("</td>");
-			out.println("<td>");
-			out.println(info.getMainArguments());
-			out.println("</td>");
-			out.println("<td>");
-			out.println(info.getJvmArguments());
-			out.println("</td>");
-			out.println("<td>");
-			out.println(info.getJvmFlags());
-			out.println("</td>");
-			out.println("</tr>");
+			out.printf("""
+					<tr>
+					<td><a href='%s?pid=%d'>%d</a></td>
+					<td>%s</td>
+					<td>%s</td>
+					<td>%s</td>
+					<td>%s</td>
+					</tr>%n""",
+					JstackServlet.PATH, info.getProcessId(), info.getProcessId(),
+					info.getMainClass(), info.getMainArguments(),
+					info.getJvmArguments(), info.getJvmFlags());
 		}
 		out.println("</table>");
-		out.println("<p><a href='/stop'>stop</a></p>");
+		out.println("<p><a href='" + StopServlet.PATH + "'>stop</a></p>");
 	}
 }

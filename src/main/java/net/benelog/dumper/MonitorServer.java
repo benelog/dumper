@@ -10,20 +10,39 @@ import org.eclipse.jetty.server.Server;
 
 public class MonitorServer {
 
-	Server server;
-	public void start(int port) throws Exception, InterruptedException {
+	private Server server;
+
+	public void start(int port) throws Exception {
 		server = new Server(port);
-		ServletContextHandler context = new ServletContextHandler(	ServletContextHandler.NO_SESSIONS);
+		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS);
 		context.setContextPath("/");
-		context.addServlet(new ServletHolder(new JpsServlet()),"/");
-		context.addServlet(new ServletHolder(new JstackServlet()),"/jstack");		
-		context.addServlet(new ServletHolder(new StopServlet()),"/stop");		
+		JvmAttacher attacher = new JvmAttacher();
+		context.addServlet(new ServletHolder(new JpsServlet(attacher)), "/");
+		context.addServlet(new ServletHolder(new JstackServlet(attacher)), JstackServlet.PATH);
+		context.addServlet(new ServletHolder(new StopServlet(this::stopInBackground)), StopServlet.PATH);
 		server.setHandler(context);
 		server.start();
+	}
+
+	public void join() throws InterruptedException {
 		server.join();
 	}
-	
-	public void stop() throws Exception{
+
+	public void stop() throws Exception {
 		server.stop();
+	}
+
+	/**
+	 * Stopping the server from one of its own request threads would deadlock,
+	 * so the stop runs on a separate thread after the response is delivered.
+	 */
+	private void stopInBackground() {
+		new Thread(() -> {
+			try {
+				stop();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}).start();
 	}
 }

@@ -1,11 +1,9 @@
 package net.benelog.dumper.servlet;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 
 import jakarta.servlet.ServletException;
@@ -13,7 +11,6 @@ import jakarta.servlet.ServletException;
 import net.benelog.dumper.JvmAttacher;
 import net.benelog.dumper.JvmInfo;
 
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -24,7 +21,7 @@ public class JpsServletTest {
 	JpsServlet servlet = new JpsServlet(monitor);
 	MockHttpServletRequest request = new MockHttpServletRequest();
 	MockHttpServletResponse response = new MockHttpServletResponse();
-	
+
 	@Test
 	public void noActiveVms() throws ServletException, IOException {
 
@@ -33,11 +30,11 @@ public class JpsServletTest {
 
 		//then
 		String content = response.getContentAsString();
-		String fileName = "target/jps_empty.html";
-		write(content, fileName);
+		assertTrue(content.contains("<h1>Java processes</h1>"));
+		assertFalse(content.contains("<a href='" + JstackServlet.PATH));
 	}
 
-	
+
 	@Test
 	public void oneActiveVms() throws ServletException, IOException {
 		//given
@@ -46,22 +43,17 @@ public class JpsServletTest {
 		info.setJvmArguments("-Xmx1024m");
 		info.setMainClass("Start");
 		info.setJvmFlags("-server");
-		info.setMainArguments("8080");		
-		List<JvmInfo> monitored = Arrays.asList(info);
-		given(monitor.getRunningJvms()).willReturn(monitored);
+		info.setMainArguments("8080");
+		given(monitor.getRunningJvms()).willReturn(List.of(info));
 
 		//when
 		servlet.doGet(request, response);
 
 		//then
 		String content = response.getContentAsString();
-		String fileName = "target/jps_pid1.html";
-		write(content, fileName);
-	}
-
-	private void write(String html, String fileName) throws IOException {
-		System.out.println(html);
-		File htmlFile = new File(fileName);
-		FileUtils.writeStringToFile(htmlFile, html, StandardCharsets.UTF_8);
+		assertTrue(content.contains("<a href='" + JstackServlet.PATH + "?pid=1'>1</a>"));
+		assertTrue(content.contains("<td>Start</td>"));
+		assertTrue(content.contains("<td>-Xmx1024m</td>"));
+		assertTrue(content.contains("<td>-server</td>"));
 	}
 }

@@ -2,12 +2,12 @@ package net.benelog.dumper;
 
 import static org.junit.Assert.*;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.junit.Test;
+
+import com.sun.tools.attach.VirtualMachine;
 
 public class JvmAttacherTest {
 
@@ -24,7 +24,7 @@ public class JvmAttacherTest {
 	public void stackDumpOfItselfShouldBeCreated() throws Exception {
 		String pid = String.valueOf(ProcessHandle.current().pid());
 
-		String dumpContent = createThreadDump(pid);
+		String dumpContent = attacher.createThreadDump(pid);
 
 		assertTrue(dumpContent.contains("Full thread dump"));
 	}
@@ -35,19 +35,12 @@ public class JvmAttacherTest {
 		try {
 			String pid = String.valueOf(target.pid());
 
-			String dumpContent = createThreadDump(pid);
+			String dumpContent = attacher.createThreadDump(pid);
 
 			assertTrue(dumpContent.contains("Full thread dump"));
 		} finally {
 			target.destroyForcibly();
 		}
-	}
-
-	private String createThreadDump(String pid) throws Exception {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		attacher.createThreadDump(pid, out);
-		out.close();
-		return out.toString(StandardCharsets.UTF_8);
 	}
 
 	private Process startAnotherJvm() throws Exception {
@@ -64,10 +57,8 @@ public class JvmAttacherTest {
 	private void waitUntilAttachable(Process process) throws Exception {
 		String pid = String.valueOf(process.pid());
 		for (int i = 0; i < 50; i++) {
-			for (JvmInfo info : attacher.getRunningJvms()) {
-				if (pid.equals(String.valueOf(info.getProcessId()))) {
-					return;
-				}
+			if (VirtualMachine.list().stream().anyMatch(descriptor -> pid.equals(descriptor.id()))) {
+				return;
 			}
 			Thread.sleep(200);
 		}
