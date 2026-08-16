@@ -38,15 +38,16 @@ public class JvmAttacher {
 	}
 
 	public List<JvmInfo> getRunningJvms() {
-		return VirtualMachine.list().parallelStream()
+		return VirtualMachine.list().stream()
 				.map(this::createJvmInfo)
 				.toList();
 	}
 
 	private JvmInfo createJvmInfo(VirtualMachineDescriptor descriptor) {
 		JvmInfo info = new JvmInfo();
-		info.setProcessId(Integer.parseInt(descriptor.id()));
-		if (isCurrentProcess(descriptor.id())) {
+		int pid = Integer.parseInt(descriptor.id());
+		info.setProcessId(pid);
+		if (isCurrentProcess(pid)) {
 			fillWithCurrentProcess(info);
 		} else if (!fillWithAgentProperties(info, descriptor)) {
 			fillWithDisplayName(info, descriptor.displayName());
@@ -54,8 +55,8 @@ public class JvmAttacher {
 		return info;
 	}
 
-	private boolean isCurrentProcess(String pid) {
-		return String.valueOf(ProcessHandle.current().pid()).equals(pid.trim());
+	private boolean isCurrentProcess(long pid) {
+		return ProcessHandle.current().pid() == pid;
 	}
 
 	private void fillWithCurrentProcess(JvmInfo info) {
@@ -106,7 +107,7 @@ public class JvmAttacher {
 		}
 	}
 
-	public String createThreadDump(String pid) throws IOException {
+	public String createThreadDump(long pid) throws IOException {
 		return isCurrentProcess(pid) ? readOwnThreadDump() : readThreadDump(pid);
 	}
 
@@ -118,10 +119,10 @@ public class JvmAttacher {
 		return invokeThreadPrint(ManagementFactory.getPlatformMBeanServer());
 	}
 
-	private String readThreadDump(String pid) throws IOException {
+	private String readThreadDump(long pid) throws IOException {
 		VirtualMachine vm;
 		try {
-			vm = VirtualMachine.attach(pid);
+			vm = VirtualMachine.attach(String.valueOf(pid));
 		} catch (AttachNotSupportedException e) {
 			throw new IllegalStateException("fail attach pid:" + pid, e);
 		}

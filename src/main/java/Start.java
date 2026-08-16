@@ -22,7 +22,6 @@ public class Start {
 		printUsage();
 		int port = selectPort(args);
 		MonitorServer server = new MonitorServer();
-		addShutdownHook(server);
 		server.start(port);
 		printServerAddressInfo(port);
 		server.join();
@@ -36,21 +35,14 @@ public class Start {
 		return Integer.parseInt(args[0]);
 	}
 
-	private static void printServerAddressInfo(int port) throws UnknownHostException {
-		InetAddress localhost = InetAddress.getLocalHost();
-		String ip = localhost.getHostAddress();
-		System.out.println("Web address: http://" + ip + ":" + port);
-	}
-
-	private static void addShutdownHook(MonitorServer server) {
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			try {
-				System.out.println("Server stop");
-				server.stop();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}));
+	private static void printServerAddressInfo(int port) {
+		String host;
+		try {
+			host = InetAddress.getLocalHost().getHostAddress();
+		} catch (UnknownHostException e) {
+			host = "localhost";
+		}
+		System.out.println("Web address: http://" + host + ":" + port);
 	}
 
 	private static void printUsage() {

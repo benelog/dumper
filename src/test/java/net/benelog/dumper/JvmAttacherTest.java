@@ -22,9 +22,7 @@ public class JvmAttacherTest {
 
 	@Test
 	public void stackDumpOfItselfShouldBeCreated() throws Exception {
-		String pid = String.valueOf(ProcessHandle.current().pid());
-
-		String dumpContent = attacher.createThreadDump(pid);
+		String dumpContent = attacher.createThreadDump(ProcessHandle.current().pid());
 
 		assertTrue(dumpContent.contains("Full thread dump"));
 	}
@@ -33,9 +31,7 @@ public class JvmAttacherTest {
 	public void stackDumpOfAnotherJvmShouldBeCreated() throws Exception {
 		Process target = startAnotherJvm();
 		try {
-			String pid = String.valueOf(target.pid());
-
-			String dumpContent = attacher.createThreadDump(pid);
+			String dumpContent = attacher.createThreadDump(target.pid());
 
 			assertTrue(dumpContent.contains("Full thread dump"));
 		} finally {

@@ -53,7 +53,28 @@ public class JpsServletTest {
 		String content = response.getContentAsString();
 		assertTrue(content.contains("<a href='" + JstackServlet.PATH + "?pid=1'>1</a>"));
 		assertTrue(content.contains("<td>Start</td>"));
+		assertTrue(content.contains("<td>8080</td>"));
 		assertTrue(content.contains("<td>-Xmx1024m</td>"));
 		assertTrue(content.contains("<td>-server</td>"));
+	}
+
+	@Test
+	public void markupInProcessInfoShouldBeEscaped() throws ServletException, IOException {
+		//given
+		JvmInfo info = new JvmInfo();
+		info.setProcessId(1);
+		info.setMainClass("Evil");
+		info.setMainArguments("<img src=x onerror=fetch('/stop')>");
+		info.setJvmArguments("");
+		info.setJvmFlags("");
+		given(monitor.getRunningJvms()).willReturn(List.of(info));
+
+		//when
+		servlet.doGet(request, response);
+
+		//then
+		String content = response.getContentAsString();
+		assertFalse(content.contains("<img"));
+		assertTrue(content.contains("&lt;img src=x onerror=fetch(&#39;/stop&#39;)&gt;"));
 	}
 }

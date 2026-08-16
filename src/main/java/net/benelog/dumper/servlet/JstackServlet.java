@@ -22,29 +22,40 @@ public class JstackServlet extends HttpServlet {
 
 	private final JvmAttacher monitor;
 
-	public JstackServlet() {
-		this(new JvmAttacher());
-	}
-
 	public JstackServlet(JvmAttacher monitor) {
 		this.monitor = monitor;
 	}
 
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
-		String pid = request.getParameter("pid");
-		if (pid == null || !pid.matches("\\d+")) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The 'pid' parameter is missing or not a number");
+		long pid = parsePid(request.getParameter("pid"));
+		if (pid <= 0) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "The 'pid' parameter is missing or not a positive number");
+			return;
+		}
+		String dump;
+		try {
+			dump = monitor.createThreadDump(pid);
+		} catch (IllegalStateException | IOException e) {
+			response.sendError(HttpServletResponse.SC_NOT_FOUND, "Cannot create a thread dump of the JVM " + pid);
 			return;
 		}
 		response.setContentType("application/octet-stream");
 		response.addHeader("Content-Disposition", "attachment; filename=" + getFileName(pid));
 		ServletOutputStream output = response.getOutputStream();
-		output.write(monitor.createThreadDump(pid).getBytes(StandardCharsets.UTF_8));
+		output.write(dump.getBytes(StandardCharsets.UTF_8));
 		output.flush();
 	}
 
-	private String getFileName(String pid) {
+	private long parsePid(String parameter) {
+		try {
+			return Long.parseLong(parameter);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
+	private String getFileName(long pid) {
 		return pid + "_" + TIMESTAMP_FORMAT.format(LocalDateTime.now()) + ".log";
 	}
 }

@@ -18,13 +18,11 @@ import net.benelog.dumper.JvmInfo;
  */
 public class JpsServlet extends HttpServlet {
 
+	public static final String PATH = "/";
+
 	private static final long serialVersionUID = 5827074916926280433L;
 
 	private final JvmAttacher monitor;
-
-	public JpsServlet() {
-		this(new JvmAttacher());
-	}
 
 	public JpsServlet(JvmAttacher monitor) {
 		this.monitor = monitor;
@@ -51,19 +49,35 @@ public class JpsServlet extends HttpServlet {
 				<th>VM flags</th>
 				</tr>""");
 		for (JvmInfo info : jvmInfos) {
+			String pid = Integer.toString(info.getProcessId());
 			out.printf("""
 					<tr>
-					<td><a href='%s?pid=%d'>%d</a></td>
+					<td><a href='%s?pid=%s'>%s</a></td>
 					<td>%s</td>
 					<td>%s</td>
 					<td>%s</td>
 					<td>%s</td>
 					</tr>%n""",
-					JstackServlet.PATH, info.getProcessId(), info.getProcessId(),
-					info.getMainClass(), info.getMainArguments(),
-					info.getJvmArguments(), info.getJvmFlags());
+					JstackServlet.PATH, pid, pid,
+					escape(info.getMainClass()), escape(info.getMainArguments()),
+					escape(info.getJvmArguments()), escape(info.getJvmFlags()));
 		}
 		out.println("</table>");
 		out.println("<p><a href='" + StopServlet.PATH + "'>stop</a></p>");
+	}
+
+	/**
+	 * The listed values come from other processes' command lines, so they
+	 * must not reach the page as markup.
+	 */
+	private String escape(String text) {
+		if (text == null) {
+			return "";
+		}
+		return text.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
+				.replace("\"", "&quot;")
+				.replace("'", "&#39;");
 	}
 }

@@ -22,7 +22,6 @@ public class StopServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {
 		response.setContentType("text/plain");
-		response.setStatus(HttpServletResponse.SC_OK);
 		response.getWriter().println("Server stopped");
 		response.flushBuffer();
 		shutdownAction.run();
