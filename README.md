@@ -22,7 +22,9 @@ so it has to be started with a JDK. The tools.jar of the old JDKs is not needed 
 
 Build
 
-    mvn clean package
+    ./gradlew clean build
+
+The executable jar is created at build/libs/dumper.jar
 
 License
 
